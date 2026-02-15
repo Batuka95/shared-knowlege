@@ -1,0 +1,2 @@
+adb push ascreencap /data/local/tmp/ascreencap && adb shell chmod 0777 /data/local/tmp/ascreencap
+adb push ascreencap.sh /data/local/tmp/ascreencap.sh && adb shell chmod 0777 /data/local/tmp/ascreencap.sh

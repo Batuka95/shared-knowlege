@@ -1,0 +1,14 @@
+tesseract.exe uwpocr.bmp - --psm 0 quiet 
+tesseract.exe uwpocr.bmp - --psm 1 quiet 
+tesseract.exe uwpocr.bmp - --psm 2 quiet 
+tesseract.exe uwpocr.bmp - --psm 3 quiet 
+tesseract.exe uwpocr.bmp - --psm 4 quiet 
+tesseract.exe uwpocr.bmp - --psm 5 quiet 
+tesseract.exe uwpocr.bmp - --psm 6 quiet 
+tesseract.exe uwpocr.bmp - --psm 7 quiet 
+tesseract.exe uwpocr.bmp - --psm 8 quiet 
+tesseract.exe uwpocr.bmp - --psm 9 quiet 
+tesseract.exe uwpocr.bmp - --psm 10 quiet
+tesseract.exe uwpocr.bmp - --psm 11 quiet
+tesseract.exe uwpocr.bmp - --psm 12 quiet
+tesseract.exe uwpocr.bmp - --psm 13 quiet
