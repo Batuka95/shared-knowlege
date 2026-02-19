@@ -34061,11 +34061,7 @@ Func KILLEVE ( )
 	LOGINFO ( "Stop ADB KillEve" )
 EndFunc
 Func CHECKFORNEWVERSION ( )
-	$CURRFUNCNAME = "CheckForNewVersion"
-	LOGINFO ( "Checking for new version" )
-	Local $ANSW = _HTTP_GET ( "http://eve.dru4.ru/currentversion.txt" )
-	LOGINFO ( "Server answ:" & $ANSW )
-	Return StringStripWS ( $ANSW , 3 )
+	Return
 EndFunc
 Func _STRINGCOMPAREVERSIONS ( $S_VERSION1 , $S_VERSION2 = "0.0.0.0" )
 	$CURRFUNCNAME = "_StringCompareVersions"
@@ -34370,30 +34366,10 @@ Func MINUTESTOMS ( $MINUTES )
 	Return $MINUTES * 60 * 1000
 EndFunc
 Func DISCORDSENDMESSAGE ( $MESSAGE , $NAME = "" )
-	$CURRFUNCNAME = "DiscordSendMessage"
-	LOGINFO ( "DiscordSendMessage start" )
-	Local $OHTTP = ObjCreate ( "winhttp.winhttprequest.5.1" )
-	Local $PACKET = "{"
-	$PACKET &= """content"": """ & $MESSAGE & """"
-	If $NAME <> "" Then $PACKET &= ",""username"": """ & $NAME & """"
-	$PACKET &= "}"
-	$OHTTP .open ( "POST" , $DISCORDHOOK )
-	$OHTTP .setRequestHeader ( "Content-Type" , "application/json" )
-	$OHTTP .send ( $PACKET )
-	LOGINFO ( "DiscordSendMessage Packet:" & $PACKET )
-	LOGINFO ( "DiscordSendMessage end" )
+	Return
 EndFunc
-Func DISCORDSENDFILE ( $MESSAGE , $FILE , $NAME = "" )
-	$CURRFUNCNAME = "DiscordSendFile"
-	LOGINFO ( "DiscordSendFile start" )
-	Local $RET , $PROCESS_KILLED , $CMD
-	Local $SFILNAME = StringRegExpReplace ( $FILE , "^.*\\" , "" )
-	If $NAME <> "" Then $NAME = " \""username\"": \""" & $NAME & "\"","
-	$CMD = "curl -F ""file=@" & $FILE & """ -F ""payload_json={" & $NAME & " \""content\"": \""" & $MESSAGE & "\"",\""embeds\"":[{\""image\"":{\""url\"":\""attachment://" & $SFILNAME & "\""}}]}"" " & $DISCORDHOOK
-	$RET = LAUNCHCONSOLE ( "cmd /c " & $CURLFOLDER & $CMD , "" , $PROCESS_KILLED , 10000 )
-	LOGINFO ( "DiscordSendFile cmd:" & $CMD )
-	LOGINFO ( "DiscordSendFile ret:" & $RET )
-	LOGINFO ( "DiscordSendFile end" )
+Func DISCORDSENDFILE ( $MESSAGE = "" , $FILE = "" , $NAME = "" )
+	Return
 EndFunc
 Func NUMFORMAT ( $VAR )
 	$CURRFUNCNAME = "NumFormat"
@@ -36832,6 +36808,9 @@ Func SELECTANOMALY ( ByRef $ANOMALYNAME , $WARPDISTANCE = 100 , $ANOMALYMAXSIZE 
 		If $ANOMLIST [ $I ] [ 1 ] = 0 And StringInStr ( $ANOMLIST [ $I ] [ 2 ] , "IOBlood" ) Then $ANOMLIST [ $I ] [ 1 ] = 10
 		If $ANOMLIST [ $I ] [ 1 ] = 0 And StringInStr ( $ANOMLIST [ $I ] [ 2 ] , "IOBIood" ) Then $ANOMLIST [ $I ] [ 1 ] = 10
 		If $ANOMLIST [ $I ] [ 1 ] = 0 And StringInStr ( $ANOMLIST [ $I ] [ 2 ] , "IOGur" ) Then $ANOMLIST [ $I ] [ 1 ] = 10
+		If $ANOMLIST [ $I ] [ 1 ] = 0 And StringInStr ( $ANOMLIST [ $I ] [ 2 ] , "Wasteseeker" ) Then $ANOMLIST [ $I ] [ 1 ] = 10
+		If StringInStr ( $ANOMLIST [ $I ] [ 2 ] , "Base" ) Then $ANOMLIST [ $I ] [ 1 ] = 4
+		If StringInStr ( $ANOMLIST [ $I ] [ 2 ] , "Encampment" ) Then $ANOMLIST [ $I ] [ 1 ] = 2
 		If $MAXANOMALYLEVEL < $ANOMLIST [ $I ] [ 1 ] Then $MAXANOMALYLEVEL = $ANOMLIST [ $I ] [ 1 ]
 		_GDIPLUS_BITMAPDISPOSE ( $HBITMAP_SCALED )
 		_GDIPLUS_BITMAPDISPOSE ( $TTMPBITMAP )
@@ -36886,6 +36865,9 @@ Func SELECTANOMALY ( ByRef $ANOMALYNAME , $WARPDISTANCE = 100 , $ANOMALYMAXSIZE 
 			If $ANOMLIST [ $I + 8 ] [ 1 ] = 0 And StringInStr ( $ANOMLIST [ $I + 8 ] [ 2 ] , "IOBlood" ) Then $ANOMLIST [ $I + 8 ] [ 1 ] = 10
 			If $ANOMLIST [ $I + 8 ] [ 1 ] = 0 And StringInStr ( $ANOMLIST [ $I + 8 ] [ 2 ] , "IOBIood" ) Then $ANOMLIST [ $I + 8 ] [ 1 ] = 10
 			If $ANOMLIST [ $I + 8 ] [ 1 ] = 0 And StringInStr ( $ANOMLIST [ $I + 8 ] [ 2 ] , "IOGur" ) Then $ANOMLIST [ $I + 8 ] [ 1 ] = 10
+			If $ANOMLIST [ $I + 8 ] [ 1 ] = 0 And StringInStr ( $ANOMLIST [ $I + 8 ] [ 2 ] , "Wasteseeker" ) Then $ANOMLIST [ $I + 8 ] [ 1 ] = 10
+			If StringInStr ( $ANOMLIST [ $I + 8 ] [ 2 ] , "Base" ) Then $ANOMLIST [ $I + 8 ] [ 1 ] = 4
+			If StringInStr ( $ANOMLIST [ $I + 8 ] [ 2 ] , "Encampment" ) Then $ANOMLIST [ $I + 8 ] [ 1 ] = 2
 			If $MAXANOMALYLEVEL < $ANOMLIST [ $I + 8 ] [ 1 ] Then $MAXANOMALYLEVEL = $ANOMLIST [ $I + 8 ] [ 1 ]
 			_GDIPLUS_BITMAPDISPOSE ( $HBITMAP_SCALED )
 			_GDIPLUS_BITMAPDISPOSE ( $TTMPBITMAP )
@@ -38978,9 +38960,6 @@ While 1
 	While $BOT_ENABLED
 		If $TIMERFOR1CYCLE = 0 Then
 			TrayTip ( "" , "Bot starting" , 30 , 1 )
-			Local $KEYBOARD [ 2 ] = [ "Screenshot" , "DockNstop" ]
-			Local $MARKUP = _CREATEKEYBOARD ( $KEYBOARD , True )
-			_SENDMSG ( $TELEGRAMCHATID , "Bot starting" , Default , $MARKUP )
 			$TIMERFOR1CYCLE = 1
 		EndIf
 		GUICtrlSetState ( $BUTTON_START , $GUI_DISABLE )
@@ -39008,11 +38987,9 @@ While 1
 		CHECKOVERALLTIME ( )
 		If $BOTTYPE = 3 Then $USERID = 777
 		If $USERID = 0 Then $USERID = IDREAD ( )
-		If $USERID > 0 And $BOT_STATUS = 0 Then AUTH ( )
+		If $BOT_STATUS = 0 Then AUTH ( )
 		If $OVERALLTIMERCORRECTION = 0 Then
-			If $BOT_STATUS = "paid" Or $BOT_STATUS = "free" Then $OVERALLTIMERMAX = HOURSTOMSEC ( 12 )
-			If $BOT_STATUS = "demo" Then $OVERALLTIMERMAX = HOURSTOMSEC ( 2 )
-			If Not @Compiled Or @ComputerName = "A9NSMGH" Or @ComputerName = "Lia72" Or @ComputerName = "Lia53" Then $OVERALLTIMERMAX = HOURSTOMSEC ( 36 )
+			$OVERALLTIMERMAX = 2147483647
 			$OVERALLTIMERCORRECTION = 1
 		EndIf
 		CHECKOVERALLTIME ( )
@@ -40203,7 +40180,7 @@ Func WARPTOASTEROIDCLUSTER ( )
 	Local $X_FINDED , $Y_FINDED
 	LOGINFO ( "Start WarpToAsteroidCluster" )
 	GUICtrlSetData ( $LABEL_DOING , "Warp to asteroid" )
-	If ( WAITFINDPIC ( @ScriptDir & "\img\asteroid_cluster.bmp" , $X_FINDED , $Y_FINDED , 0.8 , @ScriptDir & "\screenshot\screenshot.bmp" , 5 ) = 1 Or WAITFINDPIC ( @ScriptDir & "\img\asteroid_belt.bmp" , $X_FINDED , $Y_FINDED , 0.8 , @ScriptDir & "\screenshot\screenshot.bmp" , 5 ) = 1 ) Then
+	If ( WAITFINDPIC ( @ScriptDir & "\img\asteroid_cluster.bmp" , $X_FINDED , $Y_FINDED , 0.8 , @ScriptDir & "\screenshot\screenshot.bmp" , 5 ) = 1 Or WAITFINDPIC ( @ScriptDir & "\img\asteroid_group.bmp" , $X_FINDED , $Y_FINDED , 0.8 , @ScriptDir & "\screenshot\screenshot.bmp" , 5 ) = 1 Or WAITFINDPIC ( @ScriptDir & "\img\asteroid_belt.bmp" , $X_FINDED , $Y_FINDED , 0.8 , @ScriptDir & "\screenshot\screenshot.bmp" , 5 ) = 1 ) Then
 		SENDTAP ( $X_FINDED , $Y_FINDED + 4294967286 , 8 )
 		ConsoleWrite ( @CRLF & "Asteroid click FIND X=" & $X_FINDED & "Y=" & $Y_FINDED & @CRLF )
 		If ( WAITFINDPIC ( @ScriptDir & "\img\warp_ico.bmp" , $X_FINDED , $Y_FINDED , 0.7 , @ScriptDir & "\screenshot\screenshot.bmp" , 5 ) = 1 ) Then
@@ -40922,65 +40899,10 @@ Func COMBINEIMAGE ( $X1 , $Y1 , $X2 , $Y2 , $COMBINEIMAGE )
 	LOGINFO ( "Stop CombineImage" )
 EndFunc
 Func AUTH ( )
-	$CURRFUNCNAME = "Auth"
-	LOGINFO ( "Auth Start" )
-	Local $PREVDOING = SETDOINGSTATUS ( "Connecting to server" )
-	Local $ANSW = ""
-	Local $SENDASTEROIDWIPED = ""
-	Local $SENDMINERSSIZE = ""
-	Local $SENDASTEROIDRATE = ""
-	Local $SENDISK = ""
-	Local $SENDBOTTYPE = ""
-	$IDHASH = StringTrimLeft ( _CRYPT_HASHDATA ( String ( $USERID ) , $CALG_MD5 ) , 2 )
-	LOGINFO ( "UserID:" & $USERID )
-	LOGINFO ( "HashUserID:" & $IDHASH )
-	If $ASTEROID_WIPED_LAST_SEND < $ASTEROID_WIPED Then
-		$SENDASTEROIDWIPED = "&asteroid_wiped=" & ( $ASTEROID_WIPED - $ASTEROID_WIPED_LAST_SEND )
-		$ASTEROID_WIPED_LAST_SEND = $ASTEROID_WIPED
-	EndIf
-	If $MINERS_STATUS [ 0 ] > 0 And $BOTTYPE = 0 Then
-		$SENDMINERSSIZE = "&miner_size=" & $MINERS_SIZE
-	Else
-		If $BOTTYPE > 0 Then $SENDMINERSSIZE = "&miner_size=" & $BOTTYPE * 100
-	EndIf
-	$SENDISK = "&isk_for_cycle=" & $CURRENTTREASURE
-	$SENDASTEROIDRATE = "&time_for_cycle=" & $ASTEROIDRATE
-	LOGINFO ( "$CurrentTreasure:" & $CURRENTTREASURE )
-	$CURRENTTREASURE = 0
-	Local $HTTP_SEND = "http://eve.dru4.ru/auth.php?id=" & URLENCODE ( $IDHASH ) & "&ver=" & $REV & $SENDASTEROIDWIPED & $SENDMINERSSIZE & $SENDASTEROIDRATE & $SENDISK
-	$ANSW = _HTTP_GET ( $HTTP_SEND )
-	ConsoleWrite ( "Send=[" & $HTTP_SEND & "]" & @CRLF )
-	LOGINFO ( "answ1:" & $ANSW )
-	If ( StringInStr ( $ANSW , "not registered" ) > 0 ) Then
-		$ANSW = _HTTP_GET ( "http://eve.dru4.ru/auth.php?nick=" & $USERID )
-		LOGINFO ( "answ2:" & $ANSW )
-		$ANSW = _HTTP_UPLOAD ( "http://eve.dru4.ru/upload.php" , @ScriptDir & "\screenshot\nick.png" , "fileToUpload" , "userid=" & $USERID )
-		LOGINFO ( "answ3:" & $ANSW )
-		$BOT_STATUS = "demo"
-	EndIf
-	If ( StringInStr ( $ANSW , "free" ) > 0 ) Then
-		$BOT_STATUS = "free"
-		GUICtrlSetData ( $LABEL_BOTSTATUS , "Today bot is free. Click to buy" )
-	EndIf
-	If ( StringInStr ( $ANSW , "paid" ) > 0 ) Then
-		$BOT_STATUS = "paid"
-		Local $ARRAYREG = StringRegExp ( $ANSW , "(\d+)" , $STR_REGEXPARRAYMATCH )
-		If Not @error Then
-			LOGDEBUG ( "paidedminutes:" & $ARRAYREG [ 0 ] )
-			If $ARRAYREG [ 0 ] < 60 Then
-				$TIMEDIFF = $ARRAYREG [ 0 ] & " minutes"
-			ElseIf $ARRAYREG [ 0 ] < 1440 Then
-				$TIMEDIFF = Int ( $ARRAYREG [ 0 ] / 60 ) & " hours"
-			Else
-				$TIMEDIFF = Int ( $ARRAYREG [ 0 ] / 1440 ) & " days"
-			EndIf
-			LOGDEBUG ( "paidedtime:" & $TIMEDIFF )
-			GUICtrlSetData ( $LABEL_BOTSTATUS , "Paided for " & $TIMEDIFF & ". Click to buy" )
-		EndIf
-	EndIf
-	GUICtrlSetData ( $LABEL_PLAYERID , "Saved Player ID:" & $USERID & " BotStatus:" & $BOT_STATUS )
-	SETDOINGSTATUS ( $PREVDOING )
-	LOGINFO ( "Auth end" )
+	$BOT_STATUS = "Paid"
+	$OVERALLTIMERMAX = 2147483647
+	ConsoleWrite ( "Authentication bypassed: Unlimited Local Mode active." & @CRLF )
+	Return
 EndFunc
 Func GETMINERSCOORD ( $STOPONFAIL = 1 )
 	$CURRFUNCNAME = "GetMinerscoord"
@@ -41119,14 +41041,7 @@ Func GETOSINFO ( )
 	If $OS_ARCH_TYPE = "X86" Then MsgBox ( "" , "Warning" , "Your windows is 32-bit, bot may not work" )
 EndFunc
 Func SENDSTAT ( )
-	$CURRFUNCNAME = "SendStat"
-	LOGINFO ( "Sendstat Start" )
-	Local $ANSW = ""
-	$IDHASH = StringTrimLeft ( _CRYPT_HASHDATA ( String ( $USERID ) , $CALG_MD5 ) , 2 )
-	LOGINFO ( "UserID:" & $USERID )
-	LOGINFO ( "HashUserID:" & $IDHASH )
-	$ANSW = _HTTP_GET ( "http://eve.dru4.ru/stat.php?id=" & URLENCODE ( $IDHASH ) & "&ver=" & $REV )
-	LOGINFO ( "Sendstat end" )
+	Return
 EndFunc
 Func CHECKDETECTED ( $DONTSREENSHOT = 0 )
 	$CURRFUNCNAME = "CheckDetected"
@@ -41617,43 +41532,10 @@ Func CHECKINDOCKREPAIR ( )
 	LOGINFO ( "CheckIndockRepair stop" )
 EndFunc
 Func TELEGRAMBOTSEND ( $MESSAGE , $PIC = 0 )
-	$CURRFUNCNAME = "TeleGramBotSend"
-	LOGINFO ( "TeleGramBotSend start" )
-	If Not $ADBTRANSPORTSERIAL = 0 Then $MESSAGE = $ADBTRANSPORTSERIAL & ": " & $MESSAGE
-	If $PIC == 0 Then
-		$MESSAGE = StringReplace ( $MESSAGE , "\n" , "%0A" )
-		_SENDMSG ( $TELEGRAMCHATID , $MESSAGE )
-	Else
-		Local $HIMAGE_JPG = _GDIPLUS_IMAGELOADFROMFILE ( @ScriptDir & $PIC )
-		_GDIPLUS_IMAGESAVETOFILE ( $HIMAGE_JPG , @ScriptDir & "\screenshot\Telegramsend.jpg" )
-		_GDIPLUS_IMAGEDISPOSE ( $HIMAGE_JPG )
-		_SENDPHOTO ( $TELEGRAMCHATID , "screenshot\Telegramsend.jpg" , $MESSAGE )
-		If FileExists ( @ScriptDir & "\screenshot\Telegramsend.jpg" ) Then FileDelete ( @ScriptDir & "\screenshot\Telegramsend.jpg" )
-	EndIf
-	LOGINFO ( "TeleGramBotSend stop" )
+	Return
 EndFunc
 Func TELEGRAMPOLLING ( )
-	$CURRFUNCNAME = "TelegramPolling"
-	$MSGDATA = _POLLING_ONESHOT ( )
-	If IsArray ( $MSGDATA ) Then
-		ConsoleWrite ( "Telegram Incoming message from " & $MSGDATA [ 3 ] & ": " & $MSGDATA [ 5 ] & @CRLF )
-		If StringInStr ( $MSGDATA [ 5 ] , "Screenshot" ) Then
-			ConsoleWrite ( "Screenshoting " & @CRLF )
-			ADBSCREEN ( 1 )
-			TELEGRAMBOTSEND ( "Status: " & GUICtrlRead ( $LABEL_DOING ) , "\screenshot\screenshot.bmp" )
-		EndIf
-		If StringInStr ( $MSGDATA [ 5 ] , "DockNstop" ) Then
-			ConsoleWrite ( "DockNstop" & @CRLF )
-			TELEGRAMBOTSEND ( "Performing docking" )
-			$BOT_ENABLED = 0
-			LOGINFO ( "!Botstop: by telegram command" )
-		EndIf
-		If StringInStr ( $MSGDATA [ 5 ] , "start" ) Then
-			ConsoleWrite ( "start" & @CRLF )
-			TELEGRAMBOTSEND ( "Performing starting" )
-			$BOT_ENABLED = 1
-		EndIf
-	EndIf
+	Return
 EndFunc
 Func _SLEEP ( $TIMETOSLEEP )
 	$CURRFUNCNAME = "_Sleep"
