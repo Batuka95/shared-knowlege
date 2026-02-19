@@ -29524,7 +29524,7 @@ Global $BLUESTACKFOLDER = RegRead ( "HKLM64\SOFTWARE\BlueStacks" , "InstallDir" 
 Global $TESSERACTFOLDER = "Tesseract-OCR\"
 Global $CURLFOLDER = "Curl\"
 Global $REV
-#AutoIt3Wrapper_UseX64=n
+#AutoIt3Wrapper_UseX64=y
 Global $__G_IBMPFORMAT = $GDIP_PXF24RGB
 Global $__G_IJPGQUALITY = 100
 Global $__G_ITIFCOLORDEPTH = 24
@@ -32990,14 +32990,7 @@ EndFunc
 #EndRegion "@ENDPOINT FUNCTIONS"
 #Region "@EXTRA FUNCTIONS"
 Func _INITBOT ( $TOKEN )
-	$TOKEN = $TOKEN
-	$URL &= $TOKEN
-	If IsArray ( _GETME ( ) ) Then
-		Return True
-	Else
-		ConsoleWrite ( "Ops! Error: reason may be invalid token, webhook active, internet connection..." & @CRLF )
-		Return SetError ( $INVALID_TOKEN_ERROR , 0 , False )
-	EndIf
+	Return
 EndFunc
 Func _POLLING ( )
 	While 1
@@ -34061,7 +34054,7 @@ Func KILLEVE ( )
 	LOGINFO ( "Stop ADB KillEve" )
 EndFunc
 Func CHECKFORNEWVERSION ( )
-	Return
+	Return 0
 EndFunc
 Func _STRINGCOMPAREVERSIONS ( $S_VERSION1 , $S_VERSION2 = "0.0.0.0" )
 	$CURRFUNCNAME = "_StringCompareVersions"
@@ -38939,7 +38932,9 @@ Func WAITUNTILSHIPSTARTMOVING ( )
 	LOGINFO ( ">Wait until ship start moving complete. It takes " & Round ( TimerDiff ( $MOVINGTIMER ) / 1000 ) & "/" & $MOVINGTIMEOUT / 1000 & " seconds." )
 EndFunc
 TESTADB ( )
-If Not $USERID = 0 Then AUTH ( )
+$BOT_STATUS = "Paid"
+$OVERALLTIMERMAX = 2147483647
+; If Not $USERID = 0 Then AUTH ( )
 If $CLICKTYPE = 4 Then
 	GUICtrlSetData ( $LABEL_DOING , "Preparing" )
 	PREPAREMINTOUCH ( )
@@ -38987,7 +38982,8 @@ While 1
 		CHECKOVERALLTIME ( )
 		If $BOTTYPE = 3 Then $USERID = 777
 		If $USERID = 0 Then $USERID = IDREAD ( )
-		If $BOT_STATUS = 0 Then AUTH ( )
+		; If $BOT_STATUS = 0 Then AUTH ( )
+			$BOT_STATUS = "Paid"
 		If $OVERALLTIMERCORRECTION = 0 Then
 			$OVERALLTIMERMAX = 2147483647
 			$OVERALLTIMERCORRECTION = 1
