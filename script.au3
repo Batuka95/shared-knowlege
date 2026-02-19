@@ -32625,6 +32625,9 @@ EndFunc
 Global $TOKEN = ""
 Global $URL = "https://api.telegram.org/bot"
 Global $OFFSET = 0
+Global $ENABLE_REMOTE_SERVER = 0
+Global $ENABLE_TELEGRAM = 0
+Global $REMOTE_SERVER_BASE_URL = "http://eve.dru4.ru"
 Const $BOT_CRLF = __URLENCODE ( @CRLF )
 Const $INVALID_TOKEN_ERROR = 1
 Const $FILE_NOT_DOWNLOADED = 2
@@ -34060,10 +34063,22 @@ Func KILLEVE ( )
 	LOGINFO ( "ADB devices Answ len:" & StringLen ( $ANSW ) & " Answ:" & $ANSW )
 	LOGINFO ( "Stop ADB KillEve" )
 EndFunc
+Func _GETREMOTESERVERURL ( $SPATH )
+	$CURRFUNCNAME = "_GetRemoteServerUrl"
+	Local $SBASE = StringStripWS ( $REMOTE_SERVER_BASE_URL , 3 )
+	If $SBASE = "" Then $SBASE = "http://eve.dru4.ru"
+	If StringRight ( $SBASE , 1 ) = "/" Then $SBASE = StringTrimRight ( $SBASE , 1 )
+	If StringLeft ( $SPATH , 1 ) <> "/" Then $SPATH = "/" & $SPATH
+	Return $SBASE & $SPATH
+EndFunc
 Func CHECKFORNEWVERSION ( )
 	$CURRFUNCNAME = "CheckForNewVersion"
+	If Number ( $ENABLE_REMOTE_SERVER ) = 0 Then
+		LOGINFO ( "Remote server disabled. Skip version check" )
+		Return $REV
+	EndIf
 	LOGINFO ( "Checking for new version" )
-	Local $ANSW = _HTTP_GET ( "http://eve.dru4.ru/currentversion.txt" )
+	Local $ANSW = _HTTP_GET ( _GETREMOTESERVERURL ( "currentversion.txt" ) )
 	LOGINFO ( "Server answ:" & $ANSW )
 	Return StringStripWS ( $ANSW , 3 )
 EndFunc
@@ -38848,7 +38863,11 @@ EndFunc
 LOADMINERALPRIORITY ( )
 SETUPINI ( "read" )
 LOGINFO ( "Telegram init start" )
-_INITBOT ( $TELEGRAMTOKEN )
+If Number ( $ENABLE_TELEGRAM ) = 1 Then
+	_INITBOT ( $TELEGRAMTOKEN )
+Else
+	LOGINFO ( "Telegram disabled by config" )
+EndIf
 LOGINFO ( "Telegram init stop" )
 If $LOGDONTSAVEINFO = 1 Then
 	LOGINFO ( "Disabling [INFO] in logfile" )
@@ -38980,7 +38999,7 @@ While 1
 			TrayTip ( "" , "Bot starting" , 30 , 1 )
 			Local $KEYBOARD [ 2 ] = [ "Screenshot" , "DockNstop" ]
 			Local $MARKUP = _CREATEKEYBOARD ( $KEYBOARD , True )
-			_SENDMSG ( $TELEGRAMCHATID , "Bot starting" , Default , $MARKUP )
+			If Number ( $ENABLE_TELEGRAM ) = 1 Then _SENDMSG ( $TELEGRAMCHATID , "Bot starting" , Default , $MARKUP )
 			$TIMERFOR1CYCLE = 1
 		EndIf
 		GUICtrlSetState ( $BUTTON_START , $GUI_DISABLE )
@@ -39290,7 +39309,7 @@ While 1
 				TELEGRAMBOTSEND ( "Bot Stop" , "\screenshot\screenshot.bmp" )
 				Local $KEYBOARD [ 1 ] = [ "start" ]
 				Local $MARKUP = _CREATEKEYBOARD ( $KEYBOARD , True )
-				_SENDMSG ( $TELEGRAMCHATID , "Bot ready to restart" , Default , $MARKUP )
+				If Number ( $ENABLE_TELEGRAM ) = 1 Then _SENDMSG ( $TELEGRAMCHATID , "Bot ready to restart" , Default , $MARKUP )
 			EndIf
 			#EndRegion Mining MODE
 		ElseIf $BOTTYPE = 1 Then
@@ -40923,6 +40942,13 @@ Func COMBINEIMAGE ( $X1 , $Y1 , $X2 , $Y2 , $COMBINEIMAGE )
 EndFunc
 Func AUTH ( )
 	$CURRFUNCNAME = "Auth"
+	If Number ( $ENABLE_REMOTE_SERVER ) = 0 Then
+		LOGINFO ( "Remote server disabled. Using local auth mode" )
+		$BOT_STATUS = "free"
+		GUICtrlSetData ( $LABEL_BOTSTATUS , "Offline mode. Click to buy" )
+		GUICtrlSetData ( $LABEL_PLAYERID , "Saved Player ID:" & $USERID & " BotStatus:" & $BOT_STATUS )
+		Return
+	EndIf
 	LOGINFO ( "Auth Start" )
 	Local $PREVDOING = SETDOINGSTATUS ( "Connecting to server" )
 	Local $ANSW = ""
@@ -40947,14 +40973,14 @@ Func AUTH ( )
 	$SENDASTEROIDRATE = "&time_for_cycle=" & $ASTEROIDRATE
 	LOGINFO ( "$CurrentTreasure:" & $CURRENTTREASURE )
 	$CURRENTTREASURE = 0
-	Local $HTTP_SEND = "http://eve.dru4.ru/auth.php?id=" & URLENCODE ( $IDHASH ) & "&ver=" & $REV & $SENDASTEROIDWIPED & $SENDMINERSSIZE & $SENDASTEROIDRATE & $SENDISK
+	Local $HTTP_SEND = _GETREMOTESERVERURL ( "auth.php" ) & "?id=" & URLENCODE ( $IDHASH ) & "&ver=" & $REV & $SENDASTEROIDWIPED & $SENDMINERSSIZE & $SENDASTEROIDRATE & $SENDISK
 	$ANSW = _HTTP_GET ( $HTTP_SEND )
 	ConsoleWrite ( "Send=[" & $HTTP_SEND & "]" & @CRLF )
 	LOGINFO ( "answ1:" & $ANSW )
 	If ( StringInStr ( $ANSW , "not registered" ) > 0 ) Then
-		$ANSW = _HTTP_GET ( "http://eve.dru4.ru/auth.php?nick=" & $USERID )
+		$ANSW = _HTTP_GET ( _GETREMOTESERVERURL ( "auth.php" ) & "?nick=" & $USERID )
 		LOGINFO ( "answ2:" & $ANSW )
-		$ANSW = _HTTP_UPLOAD ( "http://eve.dru4.ru/upload.php" , @ScriptDir & "\screenshot\nick.png" , "fileToUpload" , "userid=" & $USERID )
+		$ANSW = _HTTP_UPLOAD ( _GETREMOTESERVERURL ( "upload.php" ) , @ScriptDir & "\screenshot\nick.png" , "fileToUpload" , "userid=" & $USERID )
 		LOGINFO ( "answ3:" & $ANSW )
 		$BOT_STATUS = "demo"
 	EndIf
@@ -41120,12 +41146,16 @@ Func GETOSINFO ( )
 EndFunc
 Func SENDSTAT ( )
 	$CURRFUNCNAME = "SendStat"
+	If Number ( $ENABLE_REMOTE_SERVER ) = 0 Then
+		LOGINFO ( "Remote server disabled. Skip SendStat" )
+		Return
+	EndIf
 	LOGINFO ( "Sendstat Start" )
 	Local $ANSW = ""
 	$IDHASH = StringTrimLeft ( _CRYPT_HASHDATA ( String ( $USERID ) , $CALG_MD5 ) , 2 )
 	LOGINFO ( "UserID:" & $USERID )
 	LOGINFO ( "HashUserID:" & $IDHASH )
-	$ANSW = _HTTP_GET ( "http://eve.dru4.ru/stat.php?id=" & URLENCODE ( $IDHASH ) & "&ver=" & $REV )
+	$ANSW = _HTTP_GET ( _GETREMOTESERVERURL ( "stat.php" ) & "?id=" & URLENCODE ( $IDHASH ) & "&ver=" & $REV )
 	LOGINFO ( "Sendstat end" )
 EndFunc
 Func CHECKDETECTED ( $DONTSREENSHOT = 0 )
@@ -41404,6 +41434,17 @@ Func SETUPINI ( $ACTION = "read" )
 		EndSwitch
 		$TELEGRAMTOKEN = IniRead ( $INIFILE , "TelegramBot" , "TelegramToken" , "" )
 		$TELEGRAMCHATID = IniRead ( $INIFILE , "TelegramBot" , "TelegramChatId" , "" )
+		$ENABLE_REMOTE_SERVER = IniRead ( $INIFILE , "Settings" , "EnableRemoteServer" , "0" )
+		$REMOTE_SERVER_BASE_URL = IniRead ( $INIFILE , "Settings" , "RemoteServerBaseUrl" , "http://eve.dru4.ru" )
+		If StringStripWS ( $TELEGRAMTOKEN , 3 ) = "" Or StringStripWS ( String ( $TELEGRAMCHATID ) , 3 ) = "" Then
+			$ENABLE_TELEGRAM = 0
+		Else
+			$ENABLE_TELEGRAM = 1
+		EndIf
+		LOGINFO ( "$EnableRemoteServer=" & $ENABLE_REMOTE_SERVER )
+		LOGINFO ( "$RemoteServerBaseUrl=" & $REMOTE_SERVER_BASE_URL )
+		GUICtrlSetData ( $LABEL_LINK , _GETREMOTESERVERURL ( "" ) )
+		LOGINFO ( "$EnableTelegram=" & $ENABLE_TELEGRAM )
 		$PREFERBELTNUMBER = IniRead ( $INIFILE , "Settings" , "PreferBeltNumber" , "0" )
 		LOGINFO ( "$PreferBeltNumber=" & $PREFERBELTNUMBER )
 		LOGINFO ( "Stop conf.ini reading" )
@@ -41433,6 +41474,8 @@ Func SETUPINI ( $ACTION = "read" )
 		IniWrite ( $INIFILE , "Waxtep`s parameters" , "CheckLocalPanicLevel" , $CHECKLOCALPANICLEVEL )
 		IniWrite ( $INIFILE , "TelegramBot" , "TelegramToken" , $TELEGRAMTOKEN )
 		IniWrite ( $INIFILE , "TelegramBot" , "TelegramChatId" , $TELEGRAMCHATID )
+		IniWrite ( $INIFILE , "Settings" , "EnableRemoteServer" , $ENABLE_REMOTE_SERVER )
+		IniWrite ( $INIFILE , "Settings" , "RemoteServerBaseUrl" , $REMOTE_SERVER_BASE_URL )
 		IniWrite ( $INIFILE , "Settings" , "PreferBeltNumber" , $PREFERBELTNUMBER )
 		IniWrite ( $INIFILE , "Anomaly" , "WeaponBoostReactivationTime" , $WEAPONBOOSTREACTIVATIONTIME )
 		IniWrite ( $INIFILE , "Anomaly" , "WeaponBoostActivationTime" , $WEAPONBOOSTACTIVATIONTIME )
@@ -41618,6 +41661,7 @@ Func CHECKINDOCKREPAIR ( )
 EndFunc
 Func TELEGRAMBOTSEND ( $MESSAGE , $PIC = 0 )
 	$CURRFUNCNAME = "TeleGramBotSend"
+	If Number ( $ENABLE_TELEGRAM ) = 0 Then Return
 	LOGINFO ( "TeleGramBotSend start" )
 	If Not $ADBTRANSPORTSERIAL = 0 Then $MESSAGE = $ADBTRANSPORTSERIAL & ": " & $MESSAGE
 	If $PIC == 0 Then
@@ -41634,6 +41678,7 @@ Func TELEGRAMBOTSEND ( $MESSAGE , $PIC = 0 )
 EndFunc
 Func TELEGRAMPOLLING ( )
 	$CURRFUNCNAME = "TelegramPolling"
+	If Number ( $ENABLE_TELEGRAM ) = 0 Then Return
 	$MSGDATA = _POLLING_ONESHOT ( )
 	If IsArray ( $MSGDATA ) Then
 		ConsoleWrite ( "Telegram Incoming message from " & $MSGDATA [ 3 ] & ": " & $MSGDATA [ 5 ] & @CRLF )
@@ -42444,7 +42489,7 @@ Func LABEL_DOINGCLICK ( )
 EndFunc
 Func LABEL_LINKCLICK ( )
 	$CURRFUNCNAME = "Label_linkClick"
-	ShellExecute ( "http://eve.dru4.ru/" )
+	ShellExecute ( _GETREMOTESERVERURL ( "" ) )
 EndFunc
 Func LABEL_LINKDISCORDCLICK ( )
 	$CURRFUNCNAME = "Label_linkDiscordClick"
