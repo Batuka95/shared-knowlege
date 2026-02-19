@@ -17,6 +17,9 @@
 #AutoIt3Wrapper_Run_After=copy *.au3 versions\%fileversion%-%date%\
 #Au3Stripper_Parameters=/mo
 #EndRegion
+Global $USERID = "LocalUser"
+Global $USERNAME = "LocalUser"
+Global $HWID = "OFFLINE"
 Global Const $MB_OK = 0
 Global Const $MB_OKCANCEL = 1
 Global Const $MB_ABORTRETRYIGNORE = 2
@@ -29412,9 +29415,6 @@ Global $GETDOCKDIRECTIONTYPE = 0
 Global $XBASE , $YBASE
 Global $XBASE_REAL , $YBASE_REAL
 Global $XWIDTH , $YHEIGHT
-Global $USERID = "LocalUser"
-Global $USERNAME = "LocalUser"
-Global $HWID = "OFFLINE"
 Global $BOT_STATUS = 0
 Global $HIDING = 0
 Global $CHECKLOCALRETREAT = 0
@@ -38794,7 +38794,7 @@ If $DIFF > 1 Then
 	GUICtrlSetData ( $LABEL_DOING , "This version is expired. Download new one." )
 	LOGINFO ( "This version is expired" )
 	MsgBox ( 262144 , "ERROR" , "This version is expired. Download new one." )
-	TERMINATE ( )
+	; TERMINATE ( )
 Else
 	GUICtrlSetData ( $LABEL_DOING , "Wasting electricity" )
 EndIf
