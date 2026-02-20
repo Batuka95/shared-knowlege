@@ -36913,7 +36913,7 @@ Func SELECTANOMALY ( ByRef $ANOMALYNAME , $WARPDISTANCE = 100 , $ANOMALYMAXSIZE 
 	For $J = $ANOMALYMAXSIZE + 4294967295 To 0 Step + 4294967295
 		For $I = 0 To 16
 			If StringInStr ( $ANOMLIST [ $I ] [ 2 ] , $ANOMALYSIZE [ $J ] ) Then
-				If StringInStr ( $ANOMLIST [ $I ] [ 2 ] , "anomaly" ) And ( $ANOMLIST [ $I ] [ 1 ] = $MAXANOMALYLEVEL Or $SELECTANYLEVEL = 1 ) Then
+				If ISANOMALYLISTENTRY ( $ANOMLIST [ $I ] [ 2 ] ) And ( $ANOMLIST [ $I ] [ 1 ] = $MAXANOMALYLEVEL Or $SELECTANYLEVEL = 1 ) Then
 					LOGDEBUG ( "Go to anomaly: " & $ANOMLIST [ $I ] [ 0 ] & "|" & $ANOMLIST [ $I ] [ 1 ] & "|" & $ANOMLIST [ $I ] [ 2 ] )
 					$ANOMALYNAME = $ANOMLIST [ $I ] [ 2 ]
 					If $ANOMLIST [ $I ] [ 0 ] <= 8 Then
@@ -36968,6 +36968,10 @@ Func SELECTANOMALY ( ByRef $ANOMALYNAME , $WARPDISTANCE = 100 , $ANOMALYMAXSIZE 
 	If FileExists ( @ScriptDir & "\screenshot\uwpocr.bmp" ) Then FileDelete ( @ScriptDir & "\screenshot\uwpocr.bmp" )
 	LOGINFO ( "Stop SelectAnomaly" )
 	Return $ANOMALYFINDED
+EndFunc
+Func ISANOMALYLISTENTRY ( $SOCRTEXT )
+	Local $SNORMALIZEDTEXT = StringLower ( $SOCRTEXT )
+	Return StringInStr ( $SNORMALIZEDTEXT , "anomaly" ) Or StringInStr ( $SNORMALIZEDTEXT , "encampment" )
 EndFunc
 Func CHECKWEAPONSTATE ( )
 	$CURRFUNCNAME = "CheckWeaponState"
